@@ -4,6 +4,8 @@
   become: yes
   become_method: sudo
   pre_tasks:
+    - name: 'update'
+      raw: sudo apt-get update
     - name: 'install python2'
       raw: sudo apt-get -y install python-simplejson
   tasks:
@@ -13,6 +15,7 @@
       apt: name={{item}} state=present
       with_items:
        - git
+       - python-pip
        - python3-pip
        - python-psycopg2
 
@@ -21,10 +24,11 @@
         repo=https://github.com/cyantarek/django-ansible-test.git
         dest=/deploy/backend/
         accept_hostkey=yes
+    - name: 'Run the script'
+      script: /Users/Radu/GitHub/terraform-tutorial/3i_Software_provisioning_Part_2/scripts/set_locale.sh
     - name: install python requirements
       pip: executable=pip3 requirements=/deploy/backend/requirements.txt
     - name: run server
       shell: python3 /deploy/backend/manage.py runserver 0.0.0.0:80 >/dev/null 2>&1 &
       async: 45
       poll: 0
-

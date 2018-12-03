@@ -12,6 +12,10 @@ resource "aws_instance" "frontend" {
   key_name               = "${var.key_name}"
   vpc_security_group_ids = ["${var.sg-id}"]
 
+  timeouts {
+    create = "300s"
+  }
+
   lifecycle {
     create_before_destroy = true
   }
@@ -23,7 +27,7 @@ resource "aws_instance" "frontend" {
   }
 
   provisioner "file" {
-    source      = "./frontend"
+    source      = "/Users/Radu/GitHub/terraform-tutorial/3j_Exercise/Frontend/frontend"
     destination = "~/"
   }
 

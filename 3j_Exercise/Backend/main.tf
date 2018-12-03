@@ -12,6 +12,10 @@ resource "aws_instance" "backend" {
   key_name               = "${var.key_name}"
   vpc_security_group_ids = ["${var.sg-id}"]
 
+  timeouts {
+    create = "300s"
+  }
+
   # force Terraform to wait until a connection can be made, so that Ansible doesn't fail when trying to provision
   provisioner "remote-exec" {
     # The connection will use the local SSH agent for authentication
@@ -33,9 +37,19 @@ resource "aws_instance" "backend" {
 #  depends_on = ["aws_instance.backend"]
 #}
 
+# resource "null_resource" "ansible-main" {
+#   provisioner "local-exec" {
+#     command = "ansible-playbook -e sshKey=${var.pvt_key} -i '${aws_instance.backend.public_ip},' ./ansible/setup-backend.yaml -v"
+#   }
+#
+#   depends_on = ["aws_instance.backend"]
+# }
+
 resource "null_resource" "ansible-main" {
+  count = "${var.number_instances}"
+
   provisioner "local-exec" {
-    command = "ansible-playbook -e sshKey=${var.pvt_key} -i '${aws_instance.backend.public_ip},' ./ansible/setup-backend.yaml -v"
+    command = "ansible-playbook -e sshKey=${var.pvt_key} -i '${aws_instance.backend.*.public_ip[count.index]},' /Users/Radu/GitHub/terraform-tutorial/3j_Exercise/Backend/ansible/setup-backend.yaml -v"
   }
 
   depends_on = ["aws_instance.backend"]
